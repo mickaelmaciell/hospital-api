@@ -1,0 +1,112 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  MEDICO
+  ATENDENTE
+}
+
+enum Priority {
+  ALTA
+  MEDIA
+  BAIXA
+}
+
+enum Status {
+  CADASTRADO
+  TRIADO
+  AGUARDANDO
+  EM_ATENDIMENTO
+  CONCLUIDO
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  email     String   @unique
+  senha     String
+  role      Role
+  createdAt DateTime @default(now())
+
+  // back-relations 1:1 (um User pode ser médico OU atendente)
+  medico    Medico?    @relation("UserIsMedico")
+  atendente Atendente? @relation("UserIsAtendente")
+
+  // relação 1:N: médico → atendimentos
+  atendimentos Encounter[] @relation("MedicoAtend")
+}
+
+model Medico {
+  id            Int    @id @default(autoincrement())
+  userId        Int    @unique
+  especialidade String
+
+  // lado dono da 1:1 com User (nomeada)
+  user User @relation("UserIsMedico", fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Atendente {
+  id     Int @id @default(autoincrement())
+  userId Int @unique
+
+  // lado dono da 1:1 com User (nomeada)
+  user User @relation("UserIsAtendente", fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Paciente {
+  id           Int         @id @default(autoincrement())
+  nome         String
+  motivo       String?
+  prioridade   Priority?
+  status       Status      @default(CADASTRADO)
+  dataCadastro DateTime    @default(now())
+  triage       Triage?
+  atendimentos Encounter[]
+}
+
+model Triage {
+  id               Int       @id @default(autoincrement())
+  pacienteId       Int       @unique
+  temperatura      Float?
+  pressao          String?
+  freqCardiaca     Int?
+  freqRespiratoria Int?
+  alergias         String?
+  motivo           String?
+  prioridade       Priority?
+  notas            String?
+  createdAt        DateTime  @default(now())
+  completedAt      DateTime?
+  paciente         Paciente  @relation(fields: [pacienteId], references: [id])
+}
+
+model Encounter {
+  id         Int       @id @default(autoincrement())
+  pacienteId Int
+  medicoId   Int
+  horaInicio DateTime  @default(now())
+  horaFim    DateTime?
+  status     Status?
+
+  // campos clínicos
+  sintomas      String?
+  cid10         String?
+  tipo          String? // ambulatorial | urgencia | internacao
+  prescricao    String?
+  observacoes   String?
+  anamnese      String?
+  exames        String?
+  procedimentos String?
+  diagnostico   String?
+  plano         String?
+  documentos    String?
+
+  paciente Paciente @relation(fields: [pacienteId], references: [id])
+  medico   User     @relation("MedicoAtend", fields: [medicoId], references: [id])
+}
