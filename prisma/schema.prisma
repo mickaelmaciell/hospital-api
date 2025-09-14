@@ -60,14 +60,19 @@ model Atendente {
 }
 
 model Paciente {
-  id           Int         @id @default(autoincrement())
-  nome         String
-  motivo       String?
-  prioridade   Priority?
-  status       Status      @default(CADASTRADO)
-  dataCadastro DateTime    @default(now())
-  triage       Triage?
-  atendimentos Encounter[]
+  id             Int         @id @default(autoincrement())
+  nome           String
+  //motivo       String?
+  dataNascimento DateTime
+  //prioridade   Priority?
+  documento      String
+  telefone       String
+  cep            String
+  endereco       String
+  status         Status      @default(CADASTRADO)
+  dataCadastro   DateTime    @default(now())
+  triage         Triage?
+  atendimentos   Encounter[]
 }
 
 model Triage {
