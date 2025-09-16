@@ -24,24 +24,43 @@ r.post("/", requireRole("ATENDENTE"), async (req, res) => {
     return res.status(201).json(p);
   } catch (error) {
     console.log(error.message);
-    
+
     return res.status(500).json({ error: error.message });
   }
 });
 
-r.get("/triagem", async(req, res) => {
+r.get("/triagem", async (req, res) => {
   const pacientes = await prisma.paciente.findMany({
     where: {
-      status: "CADASTRADO"
+      status: "CADASTRADO",
     },
     orderBy: {
-      id: "asc"
+      id: "asc",
+    },
+  });
+
+  return res.status(200).json(pacientes);
+});
+
+r.post("/triagem", async (req, res) => {
+  const {temperatura, pressao, freqCardiaca, freqRespiratoria, alergias, notas, motivo, prioridade, pacienteId, completedAt } = req.body
+
+  const p = await prisma.triage.create({
+    data: {
+      temperatura: Number(temperatura),
+      pressao,
+      freqCardiaca: Number(freqCardiaca),
+      freqRespiratoria: Number(freqRespiratoria),
+      alergias,
+      notas,
+      motivo,
+      prioridade,
+      pacienteId,
+      completedAt
     }
   })
-  console.log(pacientes);
-  
-  return res.status(200).json(pacientes)
-})
+  return res.status(201).json(p)
+});
 
 // fila por prioridade
 r.get("/fila", async (_req, res) => {
@@ -51,6 +70,7 @@ r.get("/fila", async (_req, res) => {
     include: { triage: true },
     orderBy: [{ dataCadastro: "asc" }],
   });
+  
   const sorted = pacientes.sort(
     (a, b) => order[b.prioridade || "BAIXA"] - order[a.prioridade || "BAIXA"]
   );
@@ -61,9 +81,10 @@ r.get("/fila", async (_req, res) => {
 r.patch("/:id/status", async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
+  
   const p = await prisma.paciente.update({
     where: { id: +id },
-    data: { status },
+    data: { status: status.toUpperCase() },
   });
   res.json(p);
 });
