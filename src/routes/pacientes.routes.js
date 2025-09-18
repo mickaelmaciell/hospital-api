@@ -72,9 +72,9 @@ r.get("/fila", async (_req, res) => {
   });
   
   const sorted = pacientes.sort(
-    (a, b) => order[b.prioridade || "BAIXA"] - order[a.prioridade || "BAIXA"]
+    (a, b) => order[b.triage.prioridade || order.BAIXA] - order[a.triage.prioridade || order.BAIXA]
   );
-  res.json(sorted);
+  res.status(200).json(sorted);
 });
 
 // alterar status

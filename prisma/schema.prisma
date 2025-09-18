@@ -26,6 +26,12 @@ enum Status {
   CONCLUIDO
 }
 
+enum TipoAtendimento {
+  AMBULATORIAL
+  URGENCIA
+  INTERNACAO
+}
+
 model User {
   id        Int      @id @default(autoincrement())
   nome      String
@@ -100,17 +106,17 @@ model Encounter {
   status     Status?
 
   // campos clínicos
-  sintomas      String?
-  cid10         String?
-  tipo          String? // ambulatorial | urgencia | internacao
-  prescricao    String?
-  observacoes   String?
-  anamnese      String?
-  exames        String?
-  procedimentos String?
-  diagnostico   String?
-  plano         String?
-  documentos    String?
+  sintomas        String?
+  cid10           String?
+  tipoAtendimento TipoAtendimento? 
+  prescricao      String?
+  observacoes     String?
+  anamnese        String?
+  exames          String?
+  procedimentos   String?
+  diagnostico     String?
+  plano           String?
+  documentos      String?
 
   paciente Paciente @relation(fields: [pacienteId], references: [id])
   medico   User     @relation("MedicoAtend", fields: [medicoId], references: [id])

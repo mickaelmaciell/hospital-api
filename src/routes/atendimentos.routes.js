@@ -17,14 +17,17 @@ r.post('/iniciar', requireRole('MEDICO'), async (req, res) => {
 })
 
 // finalizar
-r.post('/finalizar/:id', requireRole('MEDICO'), async (req, res) => {
+r.patch('/finalizar/:id', requireRole('MEDICO'), async (req, res) => {
   const { id } = req.params
-  const dados = req.body
+  const dados = req.body  
+  console.log(id);
+  
   const enc = await prisma.encounter.update({
-    where: { id: +id },
+    where: { id: Number(id) },
     data: { ...dados, horaFim: new Date(), status: 'CONCLUIDO' }
   })
-  await prisma.paciente.update({ where: { id: enc.pacienteId }, data: { status: 'CONCLUIDO' } })
+  
+  await prisma.paciente.update({ where: { id: Number(enc.pacienteId) }, data: { status: 'CONCLUIDO' } })
   res.json(enc)
 })
 
