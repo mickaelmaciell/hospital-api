@@ -6,6 +6,23 @@ const r = Router();
 
 r.use(requireAuth);
 
+r.get("/", async(req, res) => {
+  try {
+    const pacientes = await prisma.paciente.findMany({
+      orderBy: {
+        dataCadastro:"asc"
+      },
+      include: {
+        triage: true,
+        atendimentos: true
+      }
+    })
+    return res.status(200).json(pacientes)
+  } catch (error) {
+    return res.status(500).json({error: error.message})
+  }
+})
+
 // cadastrar (ATENDENTE)
 r.post("/", requireRole("ATENDENTE"), async (req, res) => {
   try {
@@ -43,7 +60,18 @@ r.get("/triagem", async (req, res) => {
 });
 
 r.post("/triagem", async (req, res) => {
-  const {temperatura, pressao, freqCardiaca, freqRespiratoria, alergias, notas, motivo, prioridade, pacienteId, completedAt } = req.body
+  const {
+    temperatura,
+    pressao,
+    freqCardiaca,
+    freqRespiratoria,
+    alergias,
+    notas,
+    motivo,
+    prioridade,
+    pacienteId,
+    completedAt,
+  } = req.body;
 
   const p = await prisma.triage.create({
     data: {
@@ -56,10 +84,11 @@ r.post("/triagem", async (req, res) => {
       motivo,
       prioridade,
       pacienteId,
-      completedAt
-    }
-  })
-  return res.status(201).json(p)
+      completedAt,
+    },
+  });
+
+  return res.status(201).json(p);
 });
 
 // fila por prioridade
@@ -70,9 +99,11 @@ r.get("/fila", async (_req, res) => {
     include: { triage: true },
     orderBy: [{ dataCadastro: "asc" }],
   });
-  
+
   const sorted = pacientes.sort(
-    (a, b) => order[b.triage.prioridade || order.BAIXA] - order[a.triage.prioridade || order.BAIXA]
+    (a, b) =>
+      order[b.triage.prioridade || "BAIXA"] -
+      order[a.triage.prioridade || "BAIXA"]
   );
   res.status(200).json(sorted);
 });
@@ -81,7 +112,7 @@ r.get("/fila", async (_req, res) => {
 r.patch("/:id/status", async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
-  
+
   const p = await prisma.paciente.update({
     where: { id: +id },
     data: { status: status.toUpperCase() },
