@@ -23,6 +23,28 @@ r.get("/", async(req, res) => {
   }
 })
 
+r.get("/:id", async(req, res) => {
+  try {
+    const { id } = req.params
+    
+    const paciente = await prisma.paciente.findUnique({
+      where: {
+        id: Number(id)
+      },
+      include: {
+        triage: true,
+        atendimentos: true
+      }
+    })
+    if(!paciente) {
+      return res.status(404).json({message: "Paciente não encontrado"})
+    }
+    return res.status(200).json(paciente)
+  } catch (error) {
+    return res.status(500).json({error: error.message})
+  }
+})
+
 // cadastrar (ATENDENTE)
 r.post("/", requireRole("ATENDENTE"), async (req, res) => {
   try {

@@ -77,7 +77,7 @@ model Paciente {
   endereco       String
   status         Status      @default(CADASTRADO)
   dataCadastro   DateTime    @default(now())
-  triage         Triage?
+  triage         Triage? //Deve ser um array
   atendimentos   Encounter[]
 }
 
