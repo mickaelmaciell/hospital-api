@@ -71,7 +71,7 @@ model Paciente {
   //motivo       String?
   dataNascimento DateTime
   //prioridade   Priority?
-  documento      String
+  documento      String      @unique
   telefone       String
   cep            String
   endereco       String
@@ -108,7 +108,7 @@ model Encounter {
   // campos clínicos
   sintomas        String?
   cid10           String?
-  tipoAtendimento TipoAtendimento? 
+  tipoAtendimento TipoAtendimento?
   prescricao      String?
   observacoes     String?
   anamnese        String?

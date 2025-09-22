@@ -6,50 +6,29 @@ const r = Router();
 
 r.use(requireAuth);
 
-r.get("/", async(req, res) => {
+r.get("/", async (req, res) => {
   try {
     const pacientes = await prisma.paciente.findMany({
       orderBy: {
-        dataCadastro:"asc"
+        dataCadastro: "asc",
       },
       include: {
         triage: true,
-        atendimentos: true
-      }
-    })
-    return res.status(200).json(pacientes)
-  } catch (error) {
-    return res.status(500).json({error: error.message})
-  }
-})
-
-r.get("/:id", async(req, res) => {
-  try {
-    const { id } = req.params
-    
-    const paciente = await prisma.paciente.findUnique({
-      where: {
-        id: Number(id)
+        atendimentos: true,
       },
-      include: {
-        triage: true,
-        atendimentos: true
-      }
-    })
-    if(!paciente) {
-      return res.status(404).json({message: "Paciente não encontrado"})
-    }
-    return res.status(200).json(paciente)
+    });
+    return res.status(200).json(pacientes);
   } catch (error) {
-    return res.status(500).json({error: error.message})
+    return res.status(500).json({ error: error.message });
   }
-})
+});
 
 // cadastrar (ATENDENTE)
 r.post("/", requireRole("ATENDENTE"), async (req, res) => {
   try {
     const { nome, dataNascimento, documento, telefone, cep, endereco } =
       req.body;
+
     const p = await prisma.paciente.create({
       data: {
         nome,
@@ -140,6 +119,62 @@ r.patch("/:id/status", async (req, res) => {
     data: { status: status.toUpperCase() },
   });
   res.json(p);
+});
+
+r.patch("/buscar", async (req, res) => {
+  const { documento } = req.body;
+
+  try {
+    const paciente = await prisma.paciente.findUnique({
+      where: {
+        documento,
+      },
+      include: {
+        triage: true,
+        atendimentos: true,
+      },
+    });
+    if (!paciente) {
+      return res.status(200).json({ encontrado: false });
+    }
+
+    await prisma.paciente.update({
+      where: {
+        id: +paciente.id,
+      },
+      data: {
+        status: "CADASTRADO",
+      },
+    });
+    return res.status(200).json({
+      ...paciente,
+      encontrado: true,
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+r.get("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const paciente = await prisma.paciente.findUnique({
+      where: {
+        id: Number(id),
+      },
+      include: {
+        triage: true,
+        atendimentos: true,
+      },
+    });
+    if (!paciente) {
+      return res.status(404).json({ message: "Paciente não encontrado" });
+    }
+    return res.status(200).json(paciente);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
 });
 
 export default r;
