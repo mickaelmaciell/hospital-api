@@ -77,13 +77,13 @@ model Paciente {
   endereco       String
   status         Status      @default(CADASTRADO)
   dataCadastro   DateTime    @default(now())
-  triage         Triage? //Deve ser um array
+  triage         Triage[]
   atendimentos   Encounter[]
 }
 
 model Triage {
   id               Int       @id @default(autoincrement())
-  pacienteId       Int       @unique
+  pacienteId       Int       
   temperatura      Float?
   pressao          String?
   freqCardiaca     Int?

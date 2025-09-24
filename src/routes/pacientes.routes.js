@@ -74,6 +74,8 @@ r.post("/triagem", async (req, res) => {
     completedAt,
   } = req.body;
 
+  
+
   const p = await prisma.triage.create({
     data: {
       temperatura: Number(temperatura),
@@ -96,8 +98,8 @@ r.post("/triagem", async (req, res) => {
 r.get("/fila", async (_req, res) => {
   const order = { ALTA: 3, MEDIA: 2, BAIXA: 1 };
   const pacientes = await prisma.paciente.findMany({
-    where: { OR: [{ status: "TRIADO" }, { status: "AGUARDANDO" }] },
-    include: { triage: true },
+    where: { OR: [{ status: "EM_ATENDIMENTO" }, { status: "AGUARDANDO" }] },
+    include: { triage: true, atendimentos:true },
     orderBy: [{ dataCadastro: "asc" }],
   });
 

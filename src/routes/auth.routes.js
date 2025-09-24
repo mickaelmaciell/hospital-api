@@ -18,6 +18,7 @@ r.post('/register', async (req, res) => {
 
 r.post('/login', async (req, res) => {
   const { email, senha } = req.body
+  
   const u = await prisma.user.findUnique({ where: { email } })
   if (!u || !(await bcrypt.compare(senha, u.senha))) return res.status(401).json({ error: 'credenciais inválidas' })
   const token = jwt.sign({ id: u.id, role: u.role, nome: u.nome }, process.env.JWT_SECRET, { expiresIn: '8h' })

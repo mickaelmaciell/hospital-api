@@ -19,6 +19,7 @@ r.post('/iniciar', requireRole('MEDICO'), async (req, res) => {
 // finalizar
 r.patch('/finalizar/:id', requireRole('MEDICO'), async (req, res) => {
   const { id } = req.params
+  
   const dados = req.body  
   
   const enc = await prisma.encounter.update({
