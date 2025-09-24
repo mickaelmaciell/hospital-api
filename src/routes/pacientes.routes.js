@@ -83,7 +83,7 @@ r.post("/triagem", async (req, res) => {
       alergias,
       notas,
       motivo,
-      prioridade,
+      prioridade: prioridade.toUpperCase(),
       pacienteId,
       completedAt,
     },
